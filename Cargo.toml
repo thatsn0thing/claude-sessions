@@ -14,5 +14,8 @@ chrono = { version = "0.4", features = ["serde"] }
 base64 = "0.21"
 tokio = { version = "1.35", features = ["full"] }
 
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [dev-dependencies]
 tempfile = "3.8"

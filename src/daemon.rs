@@ -17,9 +17,9 @@ pub struct Daemon {
 
 impl Daemon {
     /// Create a new daemon instance
-    pub fn new() -> Result<Self> {
+    pub async fn new() -> Result<Self> {
         let socket_path = Self::socket_path()?;
-        let manager = Arc::new(SessionManager::new());
+        let manager = Arc::new(SessionManager::with_recovery().await);
         let (shutdown_tx, _) = tokio::sync::broadcast::channel(1);
 
         Ok(Daemon {

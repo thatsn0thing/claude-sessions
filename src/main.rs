@@ -3,6 +3,7 @@ mod daemon;
 mod ipc;
 mod logging;
 mod manager;
+mod persistence;
 mod pty;
 mod session;
 
@@ -72,13 +73,13 @@ async fn main() -> anyhow::Result<()> {
             if foreground {
                 // Run in foreground (blocking)
                 println!("🚀 Starting daemon in foreground mode...");
-                let mut daemon = Daemon::new()?;
+                let mut daemon = Daemon::new().await?;
                 daemon.run().await?;
             } else {
                 // TODO: Fork and daemonize (for now, just run in foreground)
                 println!("⚠️  Daemonization not implemented yet. Running in foreground.");
                 println!("💡 Use `claude-sessions daemon --foreground` explicitly");
-                let mut daemon = Daemon::new()?;
+                let mut daemon = Daemon::new().await?;
                 daemon.run().await?;
             }
         }
