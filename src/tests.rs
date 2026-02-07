@@ -45,8 +45,8 @@ mod tests {
         assert!(result.is_err(), "Should fail for non-existent directory");
     }
 
-    #[test]
-    fn test_start_session_valid_dir() {
+    #[tokio::test]
+    async fn test_start_session_valid_dir() {
         let manager = SessionManager::new();
         let temp_dir = create_test_dir();
         
@@ -79,9 +79,9 @@ mod tests {
     }
 
     // Integration test - only runs if 'claude' command exists
-    #[test]
+    #[tokio::test]
     #[ignore] // Use `cargo test -- --ignored` to run this
-    fn test_full_session_lifecycle() {
+    async fn test_full_session_lifecycle() {
         let manager = SessionManager::new();
         let temp_dir = create_test_dir();
         

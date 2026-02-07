@@ -42,7 +42,8 @@ impl SessionManager {
         // Spawn Claude as a PTY subprocess
         let pty_pair = spawn_claude_pty(&working_dir)
             .context("Failed to spawn Claude Code PTY")?;
-        let process = SessionProcess::new(pty_pair);
+        let process = SessionProcess::new(session_id, pty_pair)
+            .context("Failed to create session process with logging")?;
 
         // Store session and process
         {

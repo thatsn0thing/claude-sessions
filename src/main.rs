@@ -1,4 +1,5 @@
 mod daemon;
+mod logging;
 mod manager;
 mod pty;
 mod session;
@@ -40,7 +41,8 @@ enum Commands {
     Daemon,
 }
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     // Phase 1: Create a session manager directly in the CLI process
