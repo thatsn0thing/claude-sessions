@@ -29,18 +29,18 @@ mod tests {
         assert_ne!(session1.id, session2.id, "Session IDs should be unique");
     }
 
-    #[test]
-    fn test_manager_creation() {
+    #[tokio::test]
+    async fn test_manager_creation() {
         let manager = SessionManager::new();
-        let sessions = manager.list_sessions();
+        let sessions = manager.list_sessions().await;
         
         assert_eq!(sessions.len(), 0, "New manager should have no sessions");
     }
 
-    #[test]
-    fn test_start_session_invalid_dir() {
+    #[tokio::test]
+    async fn test_start_session_invalid_dir() {
         let manager = SessionManager::new();
-        let result = manager.start_session(PathBuf::from("/nonexistent/path"));
+        let result = manager.start_session(PathBuf::from("/nonexistent/path")).await;
         
         assert!(result.is_err(), "Should fail for non-existent directory");
     }
@@ -52,7 +52,7 @@ mod tests {
         
         // Note: This will fail if 'claude' command doesn't exist
         // For testing purposes, we're just checking the directory validation
-        let result = manager.start_session(temp_dir.path().to_path_buf());
+        let result = manager.start_session(temp_dir.path().to_path_buf()).await;
         
         // Expected to fail because 'claude' command likely doesn't exist in test env
         // But should pass directory validation
@@ -61,19 +61,19 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_stop_nonexistent_session() {
+    #[tokio::test]
+    async fn test_stop_nonexistent_session() {
         let manager = SessionManager::new();
         let fake_id = uuid::Uuid::new_v4();
         
-        let result = manager.stop_session(fake_id);
+        let result = manager.stop_session(fake_id).await;
         assert!(result.is_err(), "Should fail when stopping non-existent session");
     }
 
-    #[test]
-    fn test_list_sessions_empty() {
+    #[tokio::test]
+    async fn test_list_sessions_empty() {
         let manager = SessionManager::new();
-        let sessions = manager.list_sessions();
+        let sessions = manager.list_sessions().await;
         
         assert!(sessions.is_empty(), "Should return empty list for new manager");
     }
@@ -86,20 +86,20 @@ mod tests {
         let temp_dir = create_test_dir();
         
         // Start session
-        let session_id = manager.start_session(temp_dir.path().to_path_buf())
+        let session_id = manager.start_session(temp_dir.path().to_path_buf()).await
             .expect("Failed to start session");
         
         // Verify it's in the list
-        let sessions = manager.list_sessions();
+        let sessions = manager.list_sessions().await;
         assert_eq!(sessions.len(), 1);
         assert_eq!(sessions[0].id, session_id.to_string());
         
         // Stop session
-        manager.stop_session(session_id)
+        manager.stop_session(session_id).await
             .expect("Failed to stop session");
         
         // Verify it's gone
-        let sessions = manager.list_sessions();
+        let sessions = manager.list_sessions().await;
         assert_eq!(sessions.len(), 0);
     }
 
@@ -125,6 +125,7 @@ mod tests {
             working_dir: "/tmp".to_string(),
             created_at: "2024-01-01T00:00:00Z".to_string(),
             status: "running".to_string(),
+            log_path: "/tmp/test.log".to_string(),
         };
         
         let json = serde_json::to_string(&info)
@@ -132,5 +133,6 @@ mod tests {
         
         assert!(json.contains("test-id"));
         assert!(json.contains("running"));
+        assert!(json.contains("test.log"));
     }
 }

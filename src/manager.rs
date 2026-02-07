@@ -3,7 +3,8 @@ use crate::session::{Session, SessionInfo};
 use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 /// SessionManager owns all active Claude Code sessions.
@@ -29,7 +30,7 @@ impl SessionManager {
     /// Start a new Claude Code session in the given working directory.
     /// 
     /// Returns the session ID on success.
-    pub fn start_session(&self, working_dir: PathBuf) -> Result<Uuid> {
+    pub async fn start_session(&self, working_dir: PathBuf) -> Result<Uuid> {
         // Validate that the directory exists
         if !working_dir.exists() {
             anyhow::bail!("Working directory does not exist: {:?}", working_dir);
@@ -47,11 +48,11 @@ impl SessionManager {
 
         // Store session and process
         {
-            let mut sessions = self.sessions.lock().unwrap();
+            let mut sessions = self.sessions.lock().await;
             sessions.insert(session_id, session);
         }
         {
-            let mut processes = self.processes.lock().unwrap();
+            let mut processes = self.processes.lock().await;
             processes.insert(session_id, process);
         }
 
@@ -63,16 +64,16 @@ impl SessionManager {
     /// 
     /// This removes the session metadata and drops the PTY process,
     /// which should terminate the Claude subprocess.
-    pub fn stop_session(&self, session_id: Uuid) -> Result<()> {
+    pub async fn stop_session(&self, session_id: Uuid) -> Result<()> {
         {
-            let mut sessions = self.sessions.lock().unwrap();
+            let mut sessions = self.sessions.lock().await;
             if !sessions.contains_key(&session_id) {
                 anyhow::bail!("Session not found: {}", session_id);
             }
             sessions.remove(&session_id);
         }
         {
-            let mut processes = self.processes.lock().unwrap();
+            let mut processes = self.processes.lock().await;
             processes.remove(&session_id);
             // Dropping the PTY should terminate the child process
         }
@@ -84,8 +85,8 @@ impl SessionManager {
     /// List all active sessions.
     /// 
     /// Returns a vector of SessionInfo structs (without PTY handles).
-    pub fn list_sessions(&self) -> Vec<SessionInfo> {
-        let sessions = self.sessions.lock().unwrap();
+    pub async fn list_sessions(&self) -> Vec<SessionInfo> {
+        let sessions = self.sessions.lock().await;
         sessions
             .values()
             .map(|s| SessionInfo {
@@ -93,6 +94,7 @@ impl SessionManager {
                 working_dir: s.working_dir.display().to_string(),
                 created_at: s.created_at.clone(),
                 status: "running".to_string(),
+                log_path: s.log_path.display().to_string(),
             })
             .collect()
     }

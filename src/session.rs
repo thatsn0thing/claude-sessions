@@ -50,4 +50,5 @@ pub struct SessionInfo {
     pub working_dir: String,
     pub created_at: String,
     pub status: String,
+    pub log_path: String,
 }
