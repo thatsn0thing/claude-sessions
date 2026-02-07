@@ -3,6 +3,9 @@ mod manager;
 mod pty;
 mod session;
 
+#[cfg(test)]
+mod tests;
+
 use clap::{Parser, Subcommand};
 use manager::SessionManager;
 use std::path::PathBuf;
