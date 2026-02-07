@@ -1,150 +1,305 @@
 # Claude Sessions
 
-A local session manager for Claude Code (macOS only).
+A local session manager for Claude Code with daemon architecture and IPC.
 
-## Problem
+## 🎯 What It Does
 
-Users currently open many terminal windows and run multiple Claude Code sessions manually. This tool provides a single local app to manage multiple Claude Code sessions.
+Manage multiple long-lived Claude Code sessions from a single interface:
+- **Daemon** runs in the background managing all sessions
+- **CLI** is a thin client over Unix sockets
+- **Logging** captures all PTY I/O to structured JSONL files
+- **macOS** compatible (Linux/BSD should work too)
 
-## Architecture
-
-### Phase 1 (Current)
-- **CLI-only**: Direct session management via command-line interface
-- **SessionManager**: Core logic to start/stop/list Claude Code sessions
-- **PTY-backed**: Each session runs as a PTY subprocess
-- **No daemon yet**: Each `start` command runs its own process
-
-### Phase 2 (Future)
-- **Daemon process**: Long-running background process managing all sessions
-- **IPC**: Unix socket communication between CLI and daemon
-- **UI**: Chat-style interface to interact with sessions
-
-## Project Structure
+## 🏗️ Architecture
 
 ```
-claude-sessions/
-├── Cargo.toml              # Dependencies
-├── src/
-│   ├── main.rs             # CLI entry point (clap)
-│   ├── daemon.rs           # Daemon wrapper (Phase 2)
-│   ├── manager.rs          # SessionManager (start/stop/list)
-│   ├── session.rs          # Session data model
-│   └── pty.rs              # PTY subprocess handling
-└── README.md
+┌─────────────────────────────────────┐
+│      Daemon Process                 │
+│  ┌───────────────────────────────┐  │
+│  │   SessionManager              │  │
+│  │   • Sessions (metadata)       │  │
+│  │   • Processes (PTY handles)   │  │
+│  │   • Logging (per-session)     │  │
+│  └───────────────────────────────┘  │
+│              │                       │
+│  ┌───────────▼────────────┐         │
+│  │   IPC Server           │         │
+│  │   (Unix Socket)        │         │
+│  └────────────────────────┘         │
+└───────────┬────────────────────────┘
+            │
+   ~/.claude-sessions/daemon.sock
+            │
+┌───────────▼──────────┐
+│   CLI (Client)       │
+│   • start            │
+│   • list             │
+│   • stop             │
+│   • attach           │
+└──────────────────────┘
 ```
 
-## Core Data Models
+## 🚀 Quick Start
 
-### `Session`
-- `id`: Unique UUID
-- `working_dir`: Path where Claude runs
-- `created_at`: Timestamp
-
-### `SessionManager`
-- `sessions`: HashMap of session metadata
-- `processes`: HashMap of PTY handles
-- Methods: `start_session`, `stop_session`, `list_sessions`
-
-## Installation
+### 1. Build
 
 ```bash
 cargo build --release
 ```
 
-## Usage
-
-### Start a new Claude Code session
+### 2. Start the Daemon
 
 ```bash
-claude-sessions start /path/to/project
+# Start daemon in foreground (for testing)
+./target/release/claude-sessions daemon --foreground
+
+# Or run in background (using nohup)
+nohup ./target/release/claude-sessions daemon --foreground > /tmp/daemon.log 2>&1 &
 ```
 
-This spawns `claude` in the specified directory as a PTY subprocess.
-
-### List active sessions
+### 3. Manage Sessions
 
 ```bash
-claude-sessions list
+# Check daemon status
+./target/release/claude-sessions status
+
+# Start a new session
+./target/release/claude-sessions start /path/to/project
+
+# List all sessions
+./target/release/claude-sessions list
+
+# Stop a session
+./target/release/claude-sessions stop <session-id>
+
+# Stop the daemon
+./target/release/claude-sessions stop-daemon
 ```
 
-Shows all running Claude Code sessions with their IDs, directories, and timestamps.
+## 📋 Commands
 
-### Stop a session
+### Daemon Management
+
+| Command | Description |
+|---------|-------------|
+| `daemon [--foreground]` | Start the daemon process |
+| `status` | Check if daemon is running |
+| `stop-daemon` | Shutdown the daemon gracefully |
+
+### Session Management
+
+| Command | Description |
+|---------|-------------|
+| `start <dir>` | Start a Claude session in directory |
+| `list` | List all active sessions |
+| `stop <id>` | Stop a running session |
+| `attach <id>` | Attach to session logs (TODO) |
+
+## 📂 File Structure
+
+```
+~/.claude-sessions/
+├── daemon.sock           # IPC Unix socket
+└── logs/
+    ├── <uuid-1>.jsonl    # Session 1 logs
+    ├── <uuid-2>.jsonl    # Session 2 logs
+    └── ...
+```
+
+## 📝 Log Format
+
+Logs are stored as **JSON Lines** (newline-delimited JSON):
+
+```json
+{"timestamp":"2026-02-07T18:15:32.123Z","session_id":"abc-123...","direction":"output","data":"SGVsbG8=","size":5}
+{"timestamp":"2026-02-07T18:15:35.456Z","session_id":"abc-123...","direction":"input","data":"Y2xhdWRl","size":6}
+```
+
+**Fields:**
+- `timestamp`: RFC3339 UTC timestamp
+- `session_id`: Session UUID
+- `direction`: `"input"` (user) or `"output"` (Claude)
+- `data`: Base64-encoded raw bytes (PTY I/O)
+- `size`: Byte count
+
+### Viewing Logs
 
 ```bash
-claude-sessions stop <SESSION_ID>
+# Raw logs
+cat ~/.claude-sessions/logs/<session-id>.jsonl
+
+# Pretty-print with jq
+jq '.' ~/.claude-sessions/logs/<session-id>.jsonl
+
+# Filter only Claude output
+jq 'select(.direction == "output")' ~/.claude-sessions/logs/<session-id>.jsonl
+
+# Decode data
+jq -r '.data' ~/.claude-sessions/logs/<session-id>.jsonl | base64 -d
 ```
 
-Terminates the Claude Code subprocess and removes the session.
+## 🔧 Development
 
-## Important Constraints
-
-1. **Black box**: Claude CLI is NOT modified or reimplemented
-2. **PTY**: Each session MUST run as a PTY subprocess
-3. **macOS only**: Uses macOS-specific PTY handling (portable-pty)
-4. **Local only**: No cloud, no authentication
-5. **Explicit > Clever**: Code prioritizes clarity and correctness
-
-## Dependencies
-
-- `portable-pty`: PTY abstraction (used by WezTerm)
-- `uuid`: Session IDs
-- `clap`: CLI argument parsing
-- `serde`/`serde_json`: Serialization
-- `anyhow`: Error handling
-- `chrono`: Timestamps
-
-## Design Decisions
-
-### Why PTY instead of stdout/stderr pipes?
-Claude Code likely expects a TTY for interactive features. PTY gives us a proper terminal interface.
-
-### Why not a daemon in Phase 1?
-Keeping it simple. Each `start` command blocks and keeps the PTY alive. This works for testing and is easy to debug.
-
-### Why Rust?
-- Systems-level control over processes and PTY
-- Strong type system prevents bugs
-- Excellent async/concurrency support (for Phase 2)
-- Native performance
-
-## Phase 2 Roadmap
-
-1. **Daemon mode**: Background process that owns all PTY handles
-2. **IPC**: Unix socket server in daemon, CLI as thin client
-3. **Session persistence**: Store session state to disk
-4. **Session reconnection**: Attach/detach from running sessions
-5. **UI**: Chat-style interface (separate app)
-
-## Known Limitations (Phase 1)
-
-- Sessions die when CLI process exits (need daemon for persistence)
-- No inter-session communication
-- No session history/logs
-- No way to "attach" to a running session
-- List command won't work across different CLI invocations
-
-## Testing
-
-Create a test directory and try:
+### Build & Test
 
 ```bash
-# Terminal 1
-claude-sessions start /tmp/test-project
+# Build
+cargo build
 
-# Terminal 2 (currently won't see the session from Terminal 1)
-claude-sessions list
+# Run tests
+cargo test
 
-# Terminal 1
-# Ctrl+C to stop
+# Run with ignored tests (requires `claude` command)
+cargo test -- --ignored
 ```
 
-Once the daemon is implemented, `list` will work across terminals.
+### Test Results
 
-## Contributing
+```
+running 18 tests
+✓ 16 passed
+○ 2 ignored (integration tests)
+```
 
-This is an MVP. Prefer simple, explicit code over clever abstractions.
+### Project Structure
 
-## License
+```
+src/
+├── main.rs          # CLI entry point (client)
+├── daemon.rs        # Daemon server
+├── client.rs        # IPC client
+├── ipc.rs           # Protocol definitions
+├── manager.rs       # SessionManager (async)
+├── pty.rs           # PTY spawning & I/O
+├── logging.rs       # Log format & writer
+├── session.rs       # Session data models
+└── tests.rs         # Test suite
+```
+
+## 📚 Documentation
+
+- **`README.md`** - This file (overview)
+- **`ARCHITECTURE.md`** - Design decisions
+- **`PHASE2.md`** - PTY streaming & logging
+- **`PHASE3.md`** - Daemon & IPC architecture
+- **`TESTING.md`** - Test coverage
+- **`SUMMARY.md`** - Complete feature summary
+
+## 🎨 Features
+
+### ✅ Implemented
+
+- [x] **Phase 1**: Basic session management
+- [x] **Phase 2**: PTY streaming & logging
+- [x] **Phase 3**: Daemon + IPC architecture
+- [x] Structured JSONL logging
+- [x] Non-blocking async I/O
+- [x] Unix socket IPC
+- [x] Session lifecycle management
+- [x] Comprehensive test suite
+
+### 🚧 TODO
+
+- [ ] Proper daemonization (fork + detach)
+- [ ] Real-time log streaming (`attach` command)
+- [ ] Session persistence across daemon restarts
+- [ ] Terminal UI (TUI)
+- [ ] Log replay tool
+- [ ] Session grouping/tagging
+- [ ] Resource limits per session
+
+## 🔒 Security
+
+### Socket Permissions
+
+- Unix socket: `~/.claude-sessions/daemon.sock`
+- Inherits user permissions (no world access)
+- Local-only (no network exposure)
+
+### Log Privacy
+
+⚠️ **Logs may contain sensitive data:**
+- API keys
+- Passwords
+- Private code
+
+**Recommendations:**
+- Restrict permissions: `chmod 600 ~/.claude-sessions/logs/*`
+- Add `.claude-sessions/` to `.gitignore`
+- Consider log encryption at rest
+- Implement auto-delete policy
+
+## 🐛 Troubleshooting
+
+### Daemon won't start
+
+```bash
+# Check if socket exists (stale)
+ls ~/.claude-sessions/daemon.sock
+
+# Remove and retry
+rm ~/.claude-sessions/daemon.sock
+claude-sessions daemon --foreground
+```
+
+### CLI says "Daemon not running"
+
+```bash
+# Check status
+claude-sessions status
+
+# Start daemon
+claude-sessions daemon --foreground
+```
+
+### Session won't start
+
+```bash
+# Ensure `claude` command exists
+which claude
+
+# Check Claude is authenticated
+claude --version
+```
+
+## 📦 Dependencies
+
+```toml
+[dependencies]
+uuid = { version = "1.6", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+portable-pty = "0.8"              # PTY abstraction
+clap = { version = "4.4", features = ["derive"] }
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.21"                   # Log encoding
+tokio = { version = "1.35", features = ["full"] }  # Async runtime
+```
+
+## 🤝 Contributing
+
+This is an MVP. Contributions welcome!
+
+**Guidelines:**
+- Prefer simple, explicit code
+- Follow existing architecture
+- Add tests for new features
+- Update documentation
+
+## 📜 License
 
 MIT
+
+## 🙏 Credits
+
+- Built with [portable-pty](https://github.com/wez/wezterm/tree/main/pty) (WezTerm)
+- Inspired by tmux, screen, and other terminal multiplexers
+- Claude Code by Anthropic
+
+---
+
+**Status**: Phase 3 Complete ✅  
+**Version**: 0.1.0  
+**Last Updated**: February 7, 2026  
+**Author**: Nitanshu Lokhande
