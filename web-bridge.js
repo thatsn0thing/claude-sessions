@@ -40,11 +40,16 @@ async function callDaemon(request) {
 
     client.on('end', () => {
       try {
+        if (!responseData.trim()) {
+          reject(new Error('Empty response from daemon'));
+          return;
+        }
         const response = JSON.parse(responseData.trim());
         resolve(response);
       } catch (err) {
-        console.error('Failed to parse daemon response:', responseData);
-        reject(new Error('Invalid JSON response from daemon'));
+        console.error('Failed to parse daemon response:', err.message);
+        console.error('Raw response data:', responseData);
+        reject(new Error(`Invalid JSON response from daemon: ${err.message}`));
       }
     });
 

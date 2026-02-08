@@ -3,13 +3,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #1e1e1e;
+  background: #0d0d0d;
 }
 
 .chat-header {
-  background: #2d2d30;
+  background: #0a0a0a;
   padding: 12px 20px;
-  border-bottom: 1px solid #3e3e42;
+  border-bottom: 1px solid #00ff00;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -18,12 +18,12 @@
 
 .chat-header .session-id {
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  color: #4ec9b0;
+  color: #00ffff;
   font-weight: 600;
 }
 
 .chat-header .working-dir {
-  color: #858585;
+  color: #00aa00;
 }
 
 /* Messages container */
@@ -42,7 +42,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #858585;
+  color: #00aa00;
   text-align: center;
 }
 
@@ -52,7 +52,7 @@
 
 .chat-empty .hint {
   font-size: 12px;
-  color: #666;
+  color: #006600;
 }
 
 /* Message bubbles */
@@ -80,9 +80,10 @@
 }
 
 .message-user .message-content {
-  background: #0e639c;
-  color: #ffffff;
-  border-radius: 12px 12px 0 12px;
+  background: transparent;
+  color: #00ffff;
+  border: 1px solid #00ffff;
+  border-radius: 0;
   padding: 12px 16px;
 }
 
@@ -92,11 +93,12 @@
 }
 
 .message-assistant .message-content {
-  background: #2d2d30;
-  color: #d4d4d4;
-  border-radius: 12px 12px 12px 0;
+  background: transparent;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  border-radius: 0;
   padding: 12px 16px;
-  border-left: 3px solid #4ec9b0;
+  border-left: 3px solid #00ff00;
 }
 
 /* System messages (centered, subtle) */
@@ -107,7 +109,7 @@
 
 .message-system .message-content {
   background: transparent;
-  color: #858585;
+  color: #00aa00;
   text-align: center;
   padding: 8px;
   font-size: 13px;
@@ -121,9 +123,9 @@
 }
 
 .message-command .message-content {
-  background: #1e1e1e;
-  border: 1px solid #3e3e42;
-  border-radius: 6px;
+  background: #0a0a0a;
+  border: 1px solid #ffff00;
+  border-radius: 0;
   padding: 12px;
   display: flex;
   gap: 8px;
@@ -132,7 +134,7 @@
 }
 
 .command-prefix {
-  color: #4ec9b0;
+  color: #ffff00;
   font-weight: bold;
 }
 
@@ -141,7 +143,7 @@
   margin: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: inherit;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -149,13 +151,13 @@
 .message-command .message-text {
   flex: 1;
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  color: #d4d4d4;
+  color: #ffff00;
 }
 
 /* Timestamp */
 .message-time {
   font-size: 10px;
-  color: #666;
+  color: #006600;
   margin-top: 4px;
   padding: 0 4px;
 }
@@ -171,8 +173,8 @@
 
 /* Input area */
 .chat-input {
-  border-top: 1px solid #3e3e42;
-  background: #252526;
+  border-top: 1px solid #00ff00;
+  background: #0a0a0a;
   padding: 16px 20px;
   display: flex;
   gap: 12px;
@@ -181,12 +183,12 @@
 
 .chat-input textarea {
   flex: 1;
-  background: #1e1e1e;
-  border: 1px solid #3e3e42;
-  border-radius: 6px;
-  color: #d4d4d4;
+  background: #0d0d0d;
+  border: 1px solid #00ff00;
+  border-radius: 0;
+  color: #00ff00;
   padding: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
   font-size: 14px;
   resize: none;
   min-height: 44px;
@@ -196,33 +198,38 @@
 
 .chat-input textarea:focus {
   outline: none;
-  border-color: #007acc;
+  border-color: #00ff00;
+  box-shadow: 0 0 10px #00ff0044;
 }
 
 .chat-input textarea::placeholder {
-  color: #666;
+  color: #006600;
 }
 
 .chat-input button {
-  background: #0e639c;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
+  background: transparent;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  border-radius: 0;
   padding: 12px 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   min-width: 80px;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .chat-input button:hover:not(:disabled) {
-  background: #1177bb;
+  background: #00ff00;
+  color: #0a0a0a;
+  box-shadow: 0 0 10px #00ff00;
 }
 
 .chat-input button:disabled {
-  background: #3e3e42;
-  color: #666;
+  background: transparent;
+  color: #003300;
+  border-color: #003300;
   cursor: not-allowed;
 }
 
@@ -232,14 +239,14 @@
 }
 
 .chat-messages::-webkit-scrollbar-track {
-  background: #1e1e1e;
+  background: #0a0a0a;
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #424242;
-  border-radius: 4px;
+  background: #003300;
+  border-radius: 0;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: #4e4e4e;
+  background: #00ff00;
 }

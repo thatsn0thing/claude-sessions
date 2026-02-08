@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,11 +22,12 @@
 }
 
 .session-creator-modal {
-  background: #2d2d30;
-  border-radius: 8px;
+  background: #0a0a0a;
+  border: 2px solid #00ff00;
+  border-radius: 0;
   width: 500px;
   max-width: 90%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 30px #00ff0044;
   animation: slideUp 0.3s ease;
 }
 
@@ -43,7 +44,7 @@
 
 .modal-header {
   padding: 20px;
-  border-bottom: 1px solid #3e3e42;
+  border-bottom: 1px solid #00ff00;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -52,23 +53,26 @@
 .modal-header h2 {
   margin: 0;
   font-size: 18px;
-  color: #fff;
+  color: #00ff00;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  text-shadow: 0 0 10px #00ff00;
 }
 
 .close-btn {
   background: transparent;
-  border: none;
-  color: #858585;
-  font-size: 20px;
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  font-size: 16px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 12px;
+  border-radius: 0;
   transition: all 0.2s;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .close-btn:hover:not(:disabled) {
-  background: #3e3e42;
-  color: #d4d4d4;
+  background: #ff0000;
+  color: #0a0a0a;
 }
 
 .close-btn:disabled {
@@ -88,8 +92,9 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #d4d4d4;
+  color: #00ff00;
   margin-bottom: 8px;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .directory-picker {
@@ -99,10 +104,10 @@
 
 .directory-picker input {
   flex: 1;
-  background: #1e1e1e;
-  border: 1px solid #3e3e42;
-  border-radius: 4px;
-  color: #d4d4d4;
+  background: #0d0d0d;
+  border: 1px solid #00ff00;
+  border-radius: 0;
+  color: #00ff00;
   padding: 10px 12px;
   font-size: 14px;
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
@@ -110,7 +115,8 @@
 
 .directory-picker input:focus {
   outline: none;
-  border-color: #007acc;
+  border-color: #00ff00;
+  box-shadow: 0 0 10px #00ff0044;
 }
 
 .directory-picker input:disabled {
@@ -119,20 +125,22 @@
 }
 
 .browse-btn {
-  background: #37373d;
-  border: 1px solid #3e3e42;
-  color: #d4d4d4;
+  background: transparent;
+  border: 1px solid #00ff00;
+  color: #00ff00;
   padding: 10px 16px;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .browse-btn:hover:not(:disabled) {
-  background: #3e3e42;
+  background: #00ff00;
+  color: #0a0a0a;
 }
 
 .browse-btn:disabled {
@@ -143,22 +151,24 @@
 .hint {
   margin: 8px 0 0 0;
   font-size: 12px;
-  color: #858585;
+  color: #00aa00;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .error-message {
-  background: rgba(244, 135, 113, 0.1);
-  border: 1px solid #f48771;
-  border-radius: 4px;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff0000;
+  border-radius: 0;
   padding: 12px;
-  color: #f48771;
+  color: #ff0000;
   font-size: 13px;
   margin-top: 16px;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .modal-footer {
   padding: 16px 20px;
-  border-top: 1px solid #3e3e42;
+  border-top: 1px solid #00ff00;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -167,31 +177,36 @@
 .cancel-btn,
 .create-btn {
   padding: 10px 20px;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  border: none;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .cancel-btn {
   background: transparent;
-  color: #858585;
+  color: #00aa00;
+  border: 1px solid #003300;
 }
 
 .cancel-btn:hover:not(:disabled) {
-  background: #3e3e42;
-  color: #d4d4d4;
+  background: #001100;
+  color: #00ff00;
+  border-color: #00ff00;
 }
 
 .create-btn {
-  background: #0e639c;
-  color: #ffffff;
+  background: transparent;
+  border: 1px solid #00ff00;
+  color: #00ff00;
 }
 
 .create-btn:hover:not(:disabled) {
-  background: #1177bb;
+  background: #00ff00;
+  color: #0a0a0a;
+  box-shadow: 0 0 10px #00ff00;
 }
 
 .cancel-btn:disabled,
