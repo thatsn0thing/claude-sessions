@@ -15,6 +15,11 @@ pub enum Request {
     StopSession {
         session_id: String,
     },
+    /// Send input to a running session
+    SendInput {
+        session_id: String,
+        text: String,
+    },
     /// Attach to session output stream (streaming logs)
     AttachSession {
         session_id: String,

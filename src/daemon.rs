@@ -184,6 +184,19 @@ impl Daemon {
                     },
                 }
             }
+            Request::SendInput { session_id, text } => {
+                match Uuid::parse_str(&session_id) {
+                    Ok(uuid) => match manager.send_input(uuid, text).await {
+                        Ok(_) => Response::Ok,
+                        Err(e) => Response::Error {
+                            message: format!("Failed to send input: {}", e),
+                        },
+                    },
+                    Err(_) => Response::Error {
+                        message: "Invalid session ID format".to_string(),
+                    },
+                }
+            }
             Request::AttachSession { session_id: _ } => {
                 // TODO: Implement log streaming
                 Response::Error {

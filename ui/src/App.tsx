@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SessionList } from './components/SessionList';
 import { TerminalViewer } from './components/TerminalViewer';
 import { ChatViewer } from './components/ChatViewer';
+import { SessionCreator } from './components/SessionCreator';
 import './App.css';
 
 interface Session {
@@ -17,6 +18,24 @@ type ViewMode = 'terminal' | 'chat';
 function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('chat');
+  const [showCreator, setShowCreator] = useState(false);
+
+  function handleNewSession() {
+    setShowCreator(true);
+  }
+
+  function handleSessionCreated(sessionId: string) {
+    setShowCreator(false);
+    // Session will appear in the list automatically on next refresh
+    console.log('Session created:', sessionId);
+  }
+
+  function handleDeleteSession(sessionId: string) {
+    // If deleted session was selected, deselect it
+    if (selectedSession?.id === sessionId) {
+      setSelectedSession(null);
+    }
+  }
 
   return (
     <div className="app">
@@ -30,6 +49,8 @@ function App() {
         <SessionList
           onSelectSession={setSelectedSession}
           selectedSessionId={selectedSession?.id}
+          onNewSession={handleNewSession}
+          onDeleteSession={handleDeleteSession}
         />
       </aside>
       <main className="main">
@@ -59,23 +80,26 @@ function App() {
           <div className="empty-state">
             <div className="empty-content">
               <h2>No Session Selected</h2>
-              <p>Select a session from the list to view its output</p>
+              <p>Click "+ New" to create a session or select an existing one</p>
               <div className="instructions">
                 <h3>Quick Start:</h3>
                 <ol>
-                  <li>
-                    Start the daemon: <code>claude-sessions daemon --foreground</code>
-                  </li>
-                  <li>
-                    Create a session: <code>claude-sessions start /path/to/project</code>
-                  </li>
-                  <li>Select it from the list</li>
+                  <li>Click the <strong>+ New</strong> button in the sidebar</li>
+                  <li>Select a project directory</li>
+                  <li>Start chatting with Claude!</li>
                 </ol>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {showCreator && (
+        <SessionCreator
+          onSessionCreated={handleSessionCreated}
+          onCancel={() => setShowCreator(false)}
+        />
+      )}
     </div>
   );
 }

@@ -168,13 +168,15 @@ export function ChatViewer({ session }: ChatViewerProps) {
       timestamp: new Date().toISOString(),
     };
 
+    // Optimistically add user message
     setMessages((prev) => [...prev, userMessage]);
+    setInput('');
 
     try {
-      // Send to PTY (for now, just log it)
+      // Send to daemon which forwards to PTY
       await invoke('send_input', {
-        logPath: session.log_path,
-        text: input.trim() + '\n',
+        sessionId: session.id,
+        text: input.trim(),
       });
     } catch (err) {
       console.error('Failed to send input:', err);
@@ -188,8 +190,6 @@ export function ChatViewer({ session }: ChatViewerProps) {
         },
       ]);
     }
-
-    setInput('');
   }
 
   function handleKeyPress(e: React.KeyboardEvent) {

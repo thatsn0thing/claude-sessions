@@ -53,6 +53,89 @@ impl DaemonClient {
         }
     }
 
+    pub async fn create_session(&self, working_dir: String) -> Result<SessionCreatedResponse> {
+        let request = serde_json::json!({
+            "type": "start_session",
+            "working_dir": working_dir
+        });
+        let response = self.send_request(&request).await?;
+
+        match response.get("type").and_then(|v| v.as_str()) {
+            Some("session_started") => {
+                let session_id = response
+                    .get("session_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let log_path = response
+                    .get("log_path")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                Ok(SessionCreatedResponse {
+                    session_id,
+                    log_path,
+                })
+            }
+            Some("error") => {
+                let msg = response
+                    .get("message")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Unknown error");
+                anyhow::bail!("Daemon error: {}", msg)
+            }
+            _ => anyhow::bail!("Unexpected response type"),
+        }
+    }
+
+    pub async fn delete_session(&self, session_id: String) -> Result<()> {
+        let request = serde_json::json!({
+            "type": "stop_session",
+            "session_id": session_id
+        });
+        let response = self.send_request(&request).await?;
+
+        match response.get("type").and_then(|v| v.as_str()) {
+            Some("session_stopped") => Ok(()),
+            Some("error") => {
+                let msg = response
+                    .get("message")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Unknown error");
+                anyhow::bail!("Daemon error: {}", msg)
+            }
+            _ => anyhow::bail!("Unexpected response type"),
+        }
+    }
+
+    pub async fn send_input(&self, session_id: String, text: String) -> Result<()> {
+        let request = serde_json::json!({
+            "type": "send_input",
+            "session_id": session_id,
+            "text": text
+        });
+        let response = self.send_request(&request).await?;
+
+        match response.get("type").and_then(|v| v.as_str()) {
+            Some("ok") => Ok(()),
+            Some("error") => {
+                let msg = response
+                    .get("message")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("Unknown error");
+                anyhow::bail!("Daemon error: {}", msg)
+            }
+            _ => anyhow::bail!("Unexpected response type"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SessionCreatedResponse {
+    pub session_id: String,
+    pub log_path: String,
+}
+
     async fn send_request(&self, request: &serde_json::Value) -> Result<serde_json::Value> {
         let stream = UnixStream::connect(&self.socket_path)
             .await

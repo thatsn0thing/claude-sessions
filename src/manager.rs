@@ -315,4 +315,33 @@ impl SessionManager {
             })
             .collect()
     }
+
+    /// Send input to a running session
+    ///
+    /// Writes the text to the session's PTY, which forwards it to Claude.
+    ///
+    /// ## Errors
+    ///
+    /// - Session not found
+    /// - Session exists but no active PTY (stale/crashed)
+    /// - PTY write failed
+    pub async fn send_input(&self, session_id: Uuid, text: String) -> Result<()> {
+        let processes = self.processes.lock().await;
+        
+        if let Some(process) = processes.get(&session_id) {
+            // Add newline if not present
+            let input = if text.ends_with('\n') {
+                text
+            } else {
+                format!("{}\n", text)
+            };
+            
+            process.write_input(input.as_bytes())
+                .context("Failed to write to PTY")?;
+            
+            Ok(())
+        } else {
+            anyhow::bail!("Session not found or not active (no PTY handle)")
+        }
+    }
 }

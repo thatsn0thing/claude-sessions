@@ -2,8 +2,8 @@ mod daemon_client;
 
 use daemon_client::{DaemonClient, SessionInfo};
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
-use std::path::PathBuf;
+use std::io::{BufRead, BufReader};
+use tauri::api::dialog::blocking::FileDialogBuilder;
 
 #[tauri::command]
 async fn list_sessions() -> Result<Vec<SessionInfo>, String> {
@@ -12,6 +12,24 @@ async fn list_sessions() -> Result<Vec<SessionInfo>, String> {
         .list_sessions()
         .await
         .map_err(|e| format!("Failed to list sessions: {}", e))
+}
+
+#[tauri::command]
+async fn create_session(working_dir: String) -> Result<SessionCreatedResponse, String> {
+    let client = DaemonClient::new().map_err(|e| e.to_string())?;
+    client
+        .create_session(working_dir)
+        .await
+        .map_err(|e| format!("Failed to create session: {}", e))
+}
+
+#[tauri::command]
+async fn delete_session(session_id: String) -> Result<(), String> {
+    let client = DaemonClient::new().map_err(|e| e.to_string())?;
+    client
+        .delete_session(session_id)
+        .await
+        .map_err(|e| format!("Failed to delete session: {}", e))
 }
 
 #[tauri::command]
@@ -30,21 +48,27 @@ async fn read_session_logs(log_path: String, offset: usize) -> Result<Vec<String
 }
 
 #[tauri::command]
-async fn send_input(log_path: String, text: String) -> Result<(), String> {
-    // Write input to log file (will be picked up by daemon)
-    // For now, we'll write directly to a companion input file
-    let input_path = PathBuf::from(&log_path).with_extension("input");
+async fn send_input(session_id: String, text: String) -> Result<(), String> {
+    let client = DaemonClient::new().map_err(|e| e.to_string())?;
+    client
+        .send_input(session_id, text)
+        .await
+        .map_err(|e| format!("Failed to send input: {}", e))
+}
+
+#[tauri::command]
+fn pick_directory() -> Result<Option<String>, String> {
+    let dialog = FileDialogBuilder::new()
+        .set_title("Select Project Directory")
+        .pick_folder();
     
-    let mut file = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&input_path)
-        .map_err(|e| format!("Failed to open input file: {}", e))?;
-    
-    writeln!(file, "{}", text)
-        .map_err(|e| format!("Failed to write input: {}", e))?;
-    
-    Ok(())
+    Ok(dialog.map(|path| path.to_string_lossy().to_string()))
+}
+
+#[derive(serde::Serialize)]
+struct SessionCreatedResponse {
+    session_id: String,
+    log_path: String,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -53,8 +77,11 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             list_sessions,
+            create_session,
+            delete_session,
             read_session_logs,
-            send_input
+            send_input,
+            pick_directory
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
