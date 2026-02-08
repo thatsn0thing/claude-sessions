@@ -5,8 +5,8 @@
 // Check if we're running in Tauri or browser
 const isTauri = typeof (window as any).__TAURI_INTERNALS__ !== 'undefined';
 
-// API base URL for browser mode
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3030/api';
+// API base URL for browser mode - use relative path for Vite proxy
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface Session {
   id: string;

@@ -5,9 +5,9 @@
 }
 
 body {
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  background: #0d0d0d;
-  color: #00ff00;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #1e1e1e;
+  color: #d4d4d4;
   overflow: hidden;
 }
 
@@ -20,8 +20,8 @@ body {
 /* Sidebar */
 .sidebar {
   width: 320px;
-  background: #0a0a0a;
-  border-right: 1px solid #00ff00;
+  background: #252526;
+  border-right: 1px solid #3e3e42;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -29,20 +29,18 @@ body {
 
 .sidebar-header {
   padding: 20px;
-  border-bottom: 1px solid #00ff00;
+  border-bottom: 1px solid #3e3e42;
 }
 
 .sidebar h1 {
   font-size: 20px;
   margin-bottom: 4px;
-  color: #00ff00;
-  font-weight: bold;
-  text-shadow: 0 0 10px #00ff00;
+  color: #fff;
 }
 
 .subtitle {
   font-size: 12px;
-  color: #00aa00;
+  color: #858585;
 }
 
 .session-list {
@@ -61,37 +59,35 @@ body {
 .session-list h2 {
   font-size: 14px;
   font-weight: 600;
-  color: #00ff00;
+  color: #cccccc;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .new-session-btn {
-  background: transparent;
-  color: #00ff00;
-  border: 1px solid #00ff00;
-  border-radius: 0;
+  background: #0e639c;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .new-session-btn:hover {
-  background: #00ff00;
-  color: #0a0a0a;
+  background: #1177bb;
 }
 
 .session-item {
   padding: 12px;
-  background: #0d0d0d;
-  border-radius: 0;
+  background: #2d2d30;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 8px;
-  border: 1px solid #003300;
+  border: 2px solid transparent;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -106,43 +102,41 @@ body {
 .delete-session-btn {
   background: transparent;
   border: none;
-  color: #ff0000;
+  color: #858585;
   font-size: 16px;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 0;
+  border-radius: 4px;
   transition: all 0.2s;
   flex-shrink: 0;
   margin-top: -4px;
 }
 
 .delete-session-btn:hover {
-  background: #ff0000;
-  color: #0a0a0a;
+  background: #f487711a;
+  color: #f48771;
 }
 
 .session-item:hover {
-  background: #001100;
-  border-color: #00ff00;
+  background: #37373d;
 }
 
 .session-item.selected {
-  background: #001a00;
-  border-color: #00ff00;
-  box-shadow: 0 0 10px #00ff0044;
+  background: #264f78;
+  border-color: #007acc;
 }
 
 .session-id {
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
-  color: #00ffff;
+  color: #4ec9b0;
   font-weight: 600;
 }
 
 .session-dir {
   margin-top: 6px;
   font-size: 13px;
-  color: #00ff00;
+  color: #d4d4d4;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -151,7 +145,7 @@ body {
 .session-time {
   margin-top: 6px;
   font-size: 11px;
-  color: #00aa00;
+  color: #858585;
 }
 
 /* Loading & Error States */
@@ -178,13 +172,12 @@ body {
 }
 
 code {
-  background: #0a0a0a;
+  background: #1e1e1e;
   padding: 4px 8px;
-  border-radius: 0;
-  border: 1px solid #003300;
+  border-radius: 4px;
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
-  color: #00ffff;
+  color: #ce9178;
   display: inline-block;
   margin-top: 8px;
 }
@@ -194,7 +187,7 @@ code {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #0d0d0d;
+  background: #1e1e1e;
   overflow: hidden;
 }
 
@@ -202,43 +195,38 @@ code {
 .view-toggle {
   display: flex;
   gap: 0;
-  background: #0a0a0a;
-  border-bottom: 1px solid #00ff00;
+  background: #2d2d30;
+  border-bottom: 1px solid #3e3e42;
   padding: 8px 12px;
 }
 
 .view-toggle button {
   background: transparent;
-  border: 1px solid #003300;
-  color: #00aa00;
+  border: none;
+  color: #858585;
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: 0;
+  border-radius: 4px;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  margin-right: 8px;
 }
 
 .view-toggle button:hover {
-  background: #001100;
-  color: #00ff00;
-  border-color: #00ff00;
+  background: #37373d;
+  color: #d4d4d4;
 }
 
 .view-toggle button.active {
-  background: #00ff00;
-  color: #0a0a0a;
-  border-color: #00ff00;
+  background: #0e639c;
+  color: #ffffff;
 }
 
 .view-toggle button.active:hover {
-  background: #00ff00;
-  box-shadow: 0 0 10px #00ff00;
+  background: #1177bb;
 }
 
 .terminal-viewer {
@@ -249,9 +237,9 @@ code {
 }
 
 .terminal-header {
-  background: #0a0a0a;
+  background: #2d2d30;
   padding: 12px 20px;
-  border-bottom: 1px solid #00ff00;
+  border-bottom: 1px solid #3e3e42;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -260,12 +248,12 @@ code {
 
 .terminal-header .session-id {
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-  color: #00ffff;
+  color: #4ec9b0;
   font-weight: 600;
 }
 
 .terminal-header .working-dir {
-  color: #00aa00;
+  color: #858585;
 }
 
 .terminal-container {
@@ -290,34 +278,33 @@ code {
 
 .empty-content h2 {
   font-size: 24px;
-  color: #00ff00;
+  color: #cccccc;
   margin-bottom: 12px;
-  text-shadow: 0 0 10px #00ff00;
 }
 
 .empty-content > p {
-  color: #00aa00;
+  color: #858585;
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
 .instructions {
-  background: #0a0a0a;
-  border-radius: 0;
+  background: #252526;
+  border-radius: 8px;
   padding: 24px;
   text-align: left;
-  border: 1px solid #00ff00;
+  border: 1px solid #3e3e42;
 }
 
 .instructions h3 {
   font-size: 16px;
   margin-bottom: 16px;
-  color: #00ff00;
+  color: #cccccc;
 }
 
 .instructions ol {
   list-style-position: inside;
-  color: #00ff00;
+  color: #d4d4d4;
   line-height: 2;
 }
 
@@ -331,14 +318,14 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #1e1e1e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #003300;
-  border-radius: 0;
+  background: #424242;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff00;
+  background: #4e4e4e;
 }
