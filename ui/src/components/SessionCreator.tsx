@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { createSession, isTauriMode } from '../api';
 import './SessionCreator.css';
 
 interface SessionCreatorProps {
@@ -13,7 +13,13 @@ export function SessionCreator({ onSessionCreated, onCancel }: SessionCreatorPro
   const [error, setError] = useState<string | null>(null);
 
   async function handlePickDirectory() {
+    if (!isTauriMode()) {
+      setError('Directory picker only available in desktop app. Please type the path manually.');
+      return;
+    }
+    
     try {
+      const { invoke } = await import('@tauri-apps/api/core');
       const selected = await invoke<string | null>('pick_directory');
       if (selected) {
         setDirectory(selected);
@@ -34,11 +40,8 @@ export function SessionCreator({ onSessionCreated, onCancel }: SessionCreatorPro
     setError(null);
 
     try {
-      const result = await invoke<{ session_id: string; log_path: string }>('create_session', {
-        workingDir: directory,
-      });
-      
-      onSessionCreated(result.session_id);
+      const result = await createSession(directory);
+      onSessionCreated(result.id);
     } catch (err) {
       setError(`Failed to create session: ${err}`);
     } finally {
