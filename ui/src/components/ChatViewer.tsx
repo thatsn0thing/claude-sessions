@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { readSessionLogs, sendInput } from '../api';
+import { invoke } from '@tauri-apps/api/core';
 import './ChatViewer.css';
 
 interface Session {
@@ -49,7 +49,10 @@ export function ChatViewer({ session }: ChatViewerProps) {
     isLoadingRef.current = true;
 
     try {
-      const lines = await readSessionLogs(session.log_path, offset);
+      const lines = await invoke<string[]>('read_session_logs', {
+        logPath: session.log_path,
+        offset,
+      });
 
       if (lines.length > 0) {
         const newMessages = parseLogLines(lines);
@@ -171,7 +174,10 @@ export function ChatViewer({ session }: ChatViewerProps) {
 
     try {
       // Send to daemon which forwards to PTY
-      await sendInput(session.id, input.trim());
+      await invoke('send_input', {
+        sessionId: session.id,
+        text: input.trim(),
+      });
     } catch (err) {
       console.error('Failed to send input:', err);
       // Show error in UI

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listSessions, deleteSession } from '../api';
+import { invoke } from '@tauri-apps/api/core';
 
 interface Session {
   id: string;
@@ -29,7 +29,7 @@ export function SessionList({ onSelectSession, selectedSessionId, onNewSession, 
 
   async function loadSessions() {
     try {
-      const result = await listSessions();
+      const result = await invoke<Session[]>('list_sessions');
       setSessions(result);
       setError(null);
     } catch (err) {
@@ -68,7 +68,7 @@ export function SessionList({ onSelectSession, selectedSessionId, onNewSession, 
     
     if (confirm('Are you sure you want to stop this session?')) {
       try {
-        await deleteSession(sessionId);
+        await invoke('delete_session', { sessionId });
         onDeleteSession(sessionId);
       } catch (err) {
         alert(`Failed to delete session: ${err}`);

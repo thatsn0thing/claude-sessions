@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { readSessionLogs } from '../api';
+import { invoke } from '@tauri-apps/api/core';
 import '@xterm/xterm/css/xterm.css';
 
 interface Session {
@@ -77,7 +77,10 @@ export function TerminalViewer({ session }: TerminalViewerProps) {
     isLoadingRef.current = true;
 
     try {
-      const lines = await readSessionLogs(session.log_path, offset);
+      const lines = await invoke<string[]>('read_session_logs', {
+        logPath: session.log_path,
+        offset,
+      });
 
       if (lines.length > 0) {
         for (const line of lines) {

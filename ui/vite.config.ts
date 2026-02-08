@@ -17,13 +17,6 @@ export default defineConfig(async () => ({
     port: 1420,
     strictPort: true,
     host: host || false,
-    allowedHosts: ['.ngrok-free.dev'],
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3030',
-        changeOrigin: true,
-      },
-    },
     hmr: host
       ? {
           protocol: "ws",
